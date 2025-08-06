@@ -1,0 +1,287 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudFormation template for S3 bucket with CloudFront distribution",
+  "Parameters": {
+    "BucketName": {
+      "Type": "String",
+      "Description": "Name for the S3 bucket (must be globally unique)",
+      "Default": "my-static-website-bucket"
+    },
+    "IndexDocument": {
+      "Type": "String",
+      "Description": "Index document for the website",
+      "Default": "index.html"
+    },
+    "ErrorDocument": {
+      "Type": "String",
+      "Description": "Error document for the website",
+      "Default": "index.html"
+    },
+    "DomainName": {
+      "Type": "String",
+      "Description": "Custom domain name for CloudFront (e.g., www.example.com). Leave empty to use CloudFront default domain.",
+      "Default": ""
+    },
+    "AcmCertificateArn": {
+      "Type": "String",
+      "Description": "ARN of the ACM SSL certificate for the custom domain (must be in us-east-1). Required if DomainName is specified.",
+      "Default": ""
+    }
+  },
+  "Conditions": {
+    "HasCustomDomain": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "DomainName"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Ref": "BucketName"
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": false,
+          "BlockPublicPolicy": false,
+          "IgnorePublicAcls": false,
+          "RestrictPublicBuckets": false
+        },
+        "WebsiteConfiguration": {
+          "IndexDocument": {
+            "Ref": "IndexDocument"
+          },
+          "ErrorDocument": {
+            "Ref": "ErrorDocument"
+          }
+        },
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        }
+      }
+    },
+    "S3BucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "DependsOn": "CloudFrontDistribution",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3Bucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowCloudFrontAccess",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+              },
+              "Action": "s3:GetObject",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "S3Bucket",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              },
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceArn": {
+                    "Fn::Sub": "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "OriginAccessControl": {
+      "Type": "AWS::CloudFront::OriginAccessControl",
+      "Properties": {
+        "OriginAccessControlConfig": {
+          "Name": {
+            "Fn::Sub": "${BucketName}-OAC"
+          },
+          "OriginAccessControlOriginType": "s3",
+          "SigningBehavior": "always",
+          "SigningProtocol": "sigv4"
+        }
+      }
+    },
+    "CloudFrontDistribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Tags": [
+            {
+              "Key": "type",
+              "Value": "resume"
+            }
+          ],
+          "Origins": [
+            {
+              "Id": "S3Origin",
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "S3Bucket",
+                  "RegionalDomainName"
+                ]
+              },
+              "S3OriginConfig": {
+                "OriginAccessIdentity": ""
+              },
+              "OriginAccessControlId": {
+                "Ref": "OriginAccessControl"
+              }
+            }
+          ],
+          "Aliases": {
+            "Fn::If": [
+              "HasCustomDomain",
+              [
+                {
+                  "Ref": "DomainName"
+                }
+              ],
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          },
+          "Enabled": true,
+          "Comment": {
+            "Fn::Sub": "CloudFront distribution for ${BucketName}"
+          },
+          "DefaultRootObject": {
+            "Ref": "IndexDocument"
+          },
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS"
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD"
+            ],
+            "TargetOriginId": "S3Origin",
+            "ForwardedValues": {
+              "QueryString": false,
+              "Cookies": {
+                "Forward": "none"
+              }
+            },
+            "TrustedSigners": [],
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "MinTTL": 0,
+            "DefaultTTL": 86400,
+            "MaxTTL": 31536000,
+            "Compress": true
+          },
+          "CustomErrorResponses": [
+            {
+              "ErrorCode": 403,
+              "ResponseCode": 200,
+              "ResponsePagePath": {
+                "Fn::Sub": "/${IndexDocument}"
+              }
+            },
+            {
+              "ErrorCode": 404,
+              "ResponseCode": 404,
+              "ResponsePagePath": {
+                "Fn::Sub": "/${ErrorDocument}"
+              }
+            }
+          ],
+          "PriceClass": "PriceClass_100",
+          "ViewerCertificate": {
+            "Fn::If": [
+              "HasCustomDomain",
+              {
+                "AcmCertificateArn": {
+                  "Ref": "AcmCertificateArn"
+                },
+                "SslSupportMethod": "sni-only",
+                "MinimumProtocolVersion": "TLSv1.2_2021"
+              },
+              {
+                "CloudFrontDefaultCertificate": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "S3BucketName": {
+      "Description": "Name of the S3 bucket",
+      "Value": {
+        "Ref": "S3Bucket"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-S3BucketName"
+        }
+      }
+    },
+    "S3BucketWebsiteURL": {
+      "Description": "Website URL of the S3 bucket",
+      "Value": {
+        "Fn::GetAtt": [
+          "S3Bucket",
+          "WebsiteURL"
+        ]
+      }
+    },
+    "CloudFrontDistributionId": {
+      "Description": "CloudFront Distribution ID",
+      "Value": {
+        "Ref": "CloudFrontDistribution"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CloudFrontDistributionId"
+        }
+      }
+    },
+    "CloudFrontDistributionDomainName": {
+      "Description": "CloudFront Distribution Domain Name",
+      "Value": {
+        "Fn::GetAtt": [
+          "CloudFrontDistribution",
+          "DomainName"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-CloudFrontDomainName"
+        }
+      }
+    },
+    "CloudFrontDistributionURL": {
+      "Description": "CloudFront Distribution URL",
+      "Value": {
+        "Fn::Sub": "https://${CloudFrontDistribution.DomainName}"
+      }
+    }
+  }
+}
