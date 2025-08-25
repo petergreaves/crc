@@ -7,7 +7,7 @@ The project is composed of two technology code-bases:
 - the IaC components which are terraform files in the tf path
 - the serverless component, a Lambda that handles the visitor count on the page, which is a Python implementation off the src path
 
-# How it works
+# How it works with AWS
 ## Host name and DNS
 The hostname is registered and all network-level ingress managed in records in an AWS Route 53 Hosted Zone.  Apart from the DNS Domain, all the Route53 stuff is under TF/IAC.
 ## HTML page storage and serving
