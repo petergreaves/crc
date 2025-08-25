@@ -26,6 +26,7 @@ module "api-gw"{
 module "lambda"{
   source = "./modules/counter-lambda"
   counter-table-name = module.db.metrics_table_name
+  api_gateway_execution_arn=module.api-gw.api-gw-exec-arn
 }
 
 module "content-s3"{

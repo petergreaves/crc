@@ -19,7 +19,7 @@ resource "aws_dynamodb_table" "metrics" {
 
   attribute {
     name = "hits"
-    type = "N"
+    type = "S"
   }
   
   # Free tier includes 25 RCUs and 25 WCUs
@@ -46,3 +46,93 @@ resource "aws_dynamodb_table" "metrics" {
     Name        = "metrics-table"
   }
 }
+
+
+# Sample data items
+resource "aws_dynamodb_table_item" "metrics_item_1" {
+  table_name = aws_dynamodb_table.metrics.name
+  hash_key   = aws_dynamodb_table.metrics.hash_key
+
+  item = jsonencode({
+    hits = {
+      S = "hit_001"
+    }
+    hit_geo = {
+      S = "US-NY-New York"
+    }
+    hit_dt = {
+      S = "2024-08-20T10:30:00Z"
+    }
+  })
+}
+
+resource "aws_dynamodb_table_item" "metrics_item_2" {
+  table_name = aws_dynamodb_table.metrics.name
+  hash_key   = aws_dynamodb_table.metrics.hash_key
+
+  item = jsonencode({
+    hits = {
+      S = "hit_002"
+    }
+    hit_geo = {
+      S = "GB-ENG-London"
+    }
+    hit_dt = {
+      S = "2024-08-20T14:45:30Z"
+    }
+  })
+}
+
+resource "aws_dynamodb_table_item" "metrics_item_3" {
+  table_name = aws_dynamodb_table.metrics.name
+  hash_key   = aws_dynamodb_table.metrics.hash_key
+
+  item = jsonencode({
+    hits = {
+      S = "hit_003"
+    }
+    hit_geo = {
+      S = "CA-ON-Toronto"
+    }
+    hit_dt = {
+      S = "2024-08-20T08:15:45Z"
+    }
+  })
+}
+
+resource "aws_dynamodb_table_item" "metrics_item_4" {
+  table_name = aws_dynamodb_table.metrics.name
+  hash_key   = aws_dynamodb_table.metrics.hash_key
+
+  item = jsonencode({
+    hits = {
+      S = "hit_004"
+    }
+    hit_geo = {
+      S = "AU-NSW-Sydney"
+    }
+    hit_dt = {
+      S = "2024-08-20T22:20:15Z"
+    }
+  })
+}
+
+resource "aws_dynamodb_table_item" "metrics_item_5" {
+  table_name = aws_dynamodb_table.metrics.name
+  hash_key   = aws_dynamodb_table.metrics.hash_key
+
+  item = jsonencode({
+    hits = {
+      S = "hit_005"
+    }
+    hit_geo = {
+      S = "DE-BE-Berlin"
+    }
+    hit_dt = {
+      S = "2024-08-20T16:55:20Z"
+    }
+  })
+}
+
+
+

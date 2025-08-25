@@ -77,9 +77,11 @@ a NoSQL database platform. The resume was designed to be an illustration of the 
         resultDiv.className = 'result loading';
         hitsDisplay.innerHTML = 'Loading...';
 
+        var apiURL = 'https://j60tzwycgi.execute-api.eu-west-2.amazonaws.com/prod/api/counter'
+
         try {
             // do a PUT with an empty body to increment the counter and get the updated hits
-            const response = await fetch('https://28g50bztrb.execute-api.eu-west-2.amazonaws.com/dev/hits/api',
+            const response = await fetch(apiURL,
                 {method: 'PUT', headers:{'Content-Type': 'application/json'}, body: ''});
 
             if (!response.ok) {

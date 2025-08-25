@@ -1,1 +1,5 @@
 **/.terraform/*
+tf/terraform.*
+tf/modules/tmp
+.terraform*
+.idea*

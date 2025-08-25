@@ -18,3 +18,17 @@ output "api-gw-url"{
   description = "the URL of the api gateway for the counter function"
   value       = module.api-gw.api_gateway_url
 }
+output "counter-lambda-name"{
+  description = "the name of the lambda function"
+  value       = module.lambda.function_name
+}
+output "api-gw-arn" {
+  description = "The  ARN of the API Gateway"
+  value       = module.api-gw.api-gw-arn
+}
+
+output "api-gw-exec-arn" {
+
+  description = "The exec ARN of the API Gateway"
+  value       = module.api-gw.api-gw-exec-arn
+}

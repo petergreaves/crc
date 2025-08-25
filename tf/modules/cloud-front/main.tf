@@ -89,6 +89,10 @@ resource "aws_cloudfront_distribution" "resume_distribution" {
 
     forwarded_values {
       query_string = false
+      headers = [
+        "CloudFront-Viewer-Country",
+        "CloudFront-Viewer-Country-Name"
+      ]
       cookies {
         forward = "none"
       }

@@ -51,11 +51,13 @@ resource "aws_api_gateway_integration" "counter_options_integration" {
   rest_api_id = aws_api_gateway_rest_api.counter_api.id
   resource_id = aws_api_gateway_resource.counter_resource.id
   http_method = aws_api_gateway_method.counter_options.http_method
-  type        = "MOCK"
-  
-  request_templates = {
-    "application/json" = "{\"statusCode\": 200}"
-  }
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.counter-lambda-invoke-arn
+
+  passthrough_behavior = "WHEN_NO_TEMPLATES"
+
 }
 
 # OPTIONS Method Response
@@ -64,25 +66,11 @@ resource "aws_api_gateway_method_response" "counter_options_response" {
   resource_id = aws_api_gateway_resource.counter_resource.id
   http_method = aws_api_gateway_method.counter_options.http_method
   status_code = "200"
-  
+ 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = true
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Origin"  = true
-  }
-}
-
-# OPTIONS Integration Response
-resource "aws_api_gateway_integration_response" "counter_options_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.counter_api.id
-  resource_id = aws_api_gateway_resource.counter_resource.id
-  http_method = aws_api_gateway_method.counter_options.http_method
-  status_code = aws_api_gateway_method_response.counter_options_response.status_code
-  
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,PUT,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"  = "'*.peter-greaves.net'"
   }
 }
 
@@ -100,8 +88,11 @@ resource "aws_api_gateway_integration" "counter_get_integration" {
   resource_id             = aws_api_gateway_resource.counter_resource.id
   http_method             = aws_api_gateway_method.counter_get.http_method
   integration_http_method = "POST"
+
   type                    = "AWS_PROXY"
   uri                     = var.counter-lambda-invoke-arn
+
+  passthrough_behavior = "WHEN_NO_TEMPLATES"
 }
 
 # GET Method Response
@@ -122,6 +113,11 @@ resource "aws_api_gateway_method" "counter_put" {
   resource_id   = aws_api_gateway_resource.counter_resource.id
   http_method   = "PUT"
   authorization = "NONE"
+
+  request_parameters = {
+    "method.request.header.CloudFront-Viewer-Country" = false
+    "method.request.header.CloudFront-Viewer-Country-Name" = false
+  }
 }
 
 # PUT Method Integration with Lambda
@@ -131,7 +127,10 @@ resource "aws_api_gateway_integration" "counter_put_integration" {
   http_method             = aws_api_gateway_method.counter_put.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
+  
   uri                     = var.counter-lambda-invoke-arn
+  passthrough_behavior = "WHEN_NO_TEMPLATES"
+
 }
 
 # PUT Method Response
@@ -146,53 +145,23 @@ resource "aws_api_gateway_method_response" "counter_put_response" {
   }
 }
 
-# Lambda Permission for API Gateway
-resource "aws_lambda_permission" "api_gateway_lambda" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = var.counter-lambda-function-name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.counter_api.execution_arn}/*/*"
-}
+data "aws_caller_identity" "current" {}
 
-# API Gateway Deployment
 resource "aws_api_gateway_deployment" "counter_api_deployment" {
-  depends_on = [
-    aws_api_gateway_method.counter_get,
-    aws_api_gateway_method.counter_put,
-    aws_api_gateway_method.counter_options,
-    aws_api_gateway_integration.counter_get_integration,
-    aws_api_gateway_integration.counter_put_integration,
-    aws_api_gateway_integration.counter_options_integration,
-  ]
-  
   rest_api_id = aws_api_gateway_rest_api.counter_api.id
-  
+
+  triggers = {
+    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.counter_api.body))
+  }
+
   lifecycle {
     create_before_destroy = true
   }
 }
 
-
-resource "aws_api_gateway_stage" "counter-api-stage" {
-  stage_name    = "prod"
-  rest_api_id   = aws_api_gateway_rest_api.counter_api.id
+# 5. Stage "prod"
+resource "aws_api_gateway_stage" "prod" {
   deployment_id = aws_api_gateway_deployment.counter_api_deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.counter_api.id
+  stage_name    = "prod"
 }
-
-# Outputs
-output "api_gateway_url" {
-  description = "The URL of the API Gateway"
-  value       = "https://${aws_api_gateway_rest_api.counter_api.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${aws_api_gateway_stage.counter-api-stage.stage_name}/api/counter"
-}
-
-output "api_gateway_id" {
-  description = "The ID of the API Gateway"
-  value       = aws_api_gateway_rest_api.counter_api.id
-}
-
-output "api_gateway_execution_arn" {
-  description = "The execution ARN of the API Gateway"
-  value       = aws_api_gateway_rest_api.counter_api.execution_arn
-}
-
