@@ -147,6 +147,8 @@ resource "aws_api_gateway_method_response" "counter_put_response" {
 data "aws_caller_identity" "current" {}
 
 resource "aws_api_gateway_deployment" "counter_api_deployment" {
+
+  depends_on = [aws_api_gateway_rest_api.counter_api]
   rest_api_id = aws_api_gateway_rest_api.counter_api.id
 
   triggers = {
