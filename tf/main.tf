@@ -42,4 +42,5 @@ module "cloud-front" {
   rec_prefix = var.rec-prefix
   bucket_reg_domain_name=module.content-s3.bucket_reg_domain_name
   bucket_arn=module.content-s3.bucket_arn
+  cert_arn = var.cert_arn
 }

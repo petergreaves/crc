@@ -1,5 +1,9 @@
 data "aws_route53_zone" "selected" {
-  name = "peter-greaves.net." # Replace with your hosted zone name
+  name = "peter-greaves.net."
+}
+
+variable "domain_name"{
+  type="string"
 }
 
 output "hosted_zone_id" {

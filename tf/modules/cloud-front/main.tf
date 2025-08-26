@@ -19,6 +19,9 @@ variable bucket_arn{
   type=string
 }
 
+variable cert_arn{
+  type=string
+}
 
 resource "aws_route53_record" "www_A" {
   zone_id = var.hosted_zone_id
@@ -45,9 +48,6 @@ alias {
   }
 }
 
-locals {
-  cert_arn= "arn:aws:acm:us-east-1:869700439563:certificate/0736b2dc-093f-4a60-bacb-e28e70414a25"
-}
 # Provider alias for us-east-1 (required for CloudFront certificates)
 provider "aws" {
   alias  = "us_east_1"
@@ -130,7 +130,7 @@ resource "aws_cloudfront_distribution" "resume_distribution" {
 
   # SSL Certificate configuration
   viewer_certificate {
-    acm_certificate_arn      = local.cert_arn
+    acm_certificate_arn      = var.cert_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
