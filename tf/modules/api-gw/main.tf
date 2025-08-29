@@ -113,6 +113,10 @@ resource "aws_api_gateway_method" "counter_put" {
   http_method   = "PUT"
   authorization = "NONE"
 
+  request_parameters = {
+  "method.request.header.CloudFront-Viewer-Country" = false
+}
+
 }
 
 # PUT Method Integration with Lambda
@@ -122,6 +126,10 @@ resource "aws_api_gateway_integration" "counter_put_integration" {
   http_method             = aws_api_gateway_method.counter_put.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
+
+  request_parameters = {
+  "integration.request.header.CloudFront-Viewer-Country" = "method.request.header.CloudFront-Viewer-Country"
+  }
   
   uri                     = var.counter-lambda-invoke-arn
   passthrough_behavior = "WHEN_NO_TEMPLATES"
