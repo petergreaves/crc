@@ -36,6 +36,7 @@ module "content-s3"{
 
 module "cloud-front-api" {
   source = "./modules/cloud-front-api"
+  api-id = element(split("/",module.api-gw.api-gw-arn), 2)
 }
 
 module "cloud-front-web" {
