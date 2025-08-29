@@ -1,12 +1,14 @@
+variable "api-id"{}
+
 resource "aws_cloudfront_distribution" "resume_api_gateway_cf" {
   enabled = true
   is_ipv6_enabled = true
-  comment             = "CloudFront distribution for the counter API"
+  comment             = "CloudFront distribution for the counter API - ${var.api-id}"
   default_root_object = ""
 
   origin {
-    domain_name = "ledhsf5tzl.execute-api.eu-west-2.amazonaws.com"
-    origin_id = "apigateway-ledhsf5tzl"
+    domain_name = "${var.api-id}.execute-api.eu-west-2.amazonaws.com"
+    origin_id = "apigateway-${var.api-id}"
 
       custom_origin_config {
         http_port              = 80
@@ -17,7 +19,7 @@ resource "aws_cloudfront_distribution" "resume_api_gateway_cf" {
   }
 
   default_cache_behavior {
-    target_origin_id = "apigateway-ledhsf5tzl"
+    target_origin_id = "apigateway-${var.api-id}"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "PATCH", "POST", "DELETE"]
     cached_methods = ["GET", "HEAD"]
