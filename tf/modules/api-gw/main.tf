@@ -113,10 +113,6 @@ resource "aws_api_gateway_method" "counter_put" {
   http_method   = "PUT"
   authorization = "NONE"
 
-  request_parameters = {
-    "method.request.header.CloudFront-Viewer-Country" = false
-    "method.request.header.CloudFront-Viewer-Country-Name" = false
-  }
 }
 
 # PUT Method Integration with Lambda
