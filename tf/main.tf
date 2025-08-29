@@ -34,8 +34,12 @@ module "content-s3"{
   bucket_name=var.content-bucket-name
 }
 
-module "cloud-front" {
-  source = "./modules/cloud-front"
+module "cloud-front-api" {
+  source = "./modules/cloud-front-api"
+}
+
+module "cloud-front-web" {
+  source = "./modules/cloud-front-web"
   content_bucket_name=var.content-bucket-name
   hz_name=var.hosted-zone-name
   hosted_zone_id=var.hosted-zone-id

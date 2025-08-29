@@ -97,7 +97,10 @@ def updateHits(event):
     'generate a random string as ID'
     hit_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     headers = event.get("headers", {})
-    country = headers.get("cloudfront-viewer-country")
+
+    #for header in headers:
+    #   print(header)
+    country = headers.get("CloudFront-Viewer-Country")
 
     if country is None:
         country = "Unknown"

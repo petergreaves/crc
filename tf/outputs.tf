@@ -32,3 +32,9 @@ output "api-gw-exec-arn" {
   description = "The exec ARN of the API Gateway"
   value       = module.api-gw.api-gw-exec-arn
 }
+
+# Output the CloudFront distribution domain name
+output "cloudfront_api_domain_name" {
+  description = "The domain name of the CloudFront distribution"
+  value       = module.cloud-front-api.cloudfront_api_domain_name
+}
