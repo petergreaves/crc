@@ -96,17 +96,15 @@ def updateHits(event):
 
     'generate a random string as ID'
     hit_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    headers = event.get("headers", {})
+    country = headers.get("cloudfront-viewer-country")
 
-    if event.get('headers'):
-        locationHeaders = get_relevant_headers(event.get('headers'))
-    else:
-        print("there are no headers!")
-
-    # geo= (locationHeaders.get('CloudFront-Viewer-Country') or locationHeaders.get('cloudfront-viewer-country'))
+    if country is None:
+        country = "Unknown"
 
     item_data = {
         'hits': hit_id,
-        'hit_geo': 'geo-undefined',
+        'hit_geo': country,
         'hit_dt': iso_format
     }
     insert_hit(item_data)
@@ -145,29 +143,3 @@ def getCount():
         scanned_count += response['ScannedCount']
 
     return count
-
-def get_relevant_headers(headers: dict) -> Dict:
-    """
-    Extract location-relevant headers for debugging
-    """
-
-    relevant_headers = {}
-    location_related_headers = [
-        'X-Forwarded-For', 'x-forwarded-for',
-        'CloudFront-Viewer-Address', 'cloudfront-viewer-address',
-        'CloudFront-Viewer-Country', 'cloudfront-viewer-country',
-        'CF-IPCountry',  # Cloudflare
-        'X-Real-IP', 'x-real-ip',
-        'X-Latitude', 'x-latitude',
-        'X-Longitude', 'x-longitude',
-        'User-Agent', 'user-agent'
-    ]
-
-    for header in location_related_headers:
-        if header in headers:
-            relevant_headers[header] = headers[header]
-            print(headers[header])
-
-    if len(relevant_headers) == 0:
-            print('No location headers')
-    return relevant_headers

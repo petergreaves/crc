@@ -70,6 +70,7 @@ resource "aws_cloudfront_distribution" "resume_distribution" {
     domain_name              = var.bucket_reg_domain_name
     origin_id                = "S3-resume-bucket"
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
+
   }
 
   enabled             = true
@@ -89,18 +90,12 @@ resource "aws_cloudfront_distribution" "resume_distribution" {
 
     forwarded_values {
       query_string = false
-      headers = [
-        "CloudFront-Viewer-Country",
-        "CloudFront-Viewer-Country-Name"
-      ]
-      cookies {
+       cookies {
         forward = "none"
       }
+
     }
 
-    min_ttl     = 0
-    default_ttl = 3600
-    max_ttl     = 86400
   }
 
   # Price class - adjust based on your needs

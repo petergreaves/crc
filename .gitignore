@@ -1,5 +1,3 @@
-**/.terraform/*
-tf/terraform.*
-tf/modules/tmp
-.terraform*
-.idea*
+tf/.terraform/**
+tf/modules/tmp/counter-lambda.zip
+.idea/**
