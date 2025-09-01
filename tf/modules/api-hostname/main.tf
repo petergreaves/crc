@@ -1,20 +1,20 @@
-# Variables
-variable "api_domain_name" {
-  description = "The custom domain name for the API"
-  type        = string
-}
-variable "hosted_zone_id" {
-  description = "Route53 hosted zone ID for peter-greaves.net"
+variable "domain_name" { 
+  description = "The external domain name for the api"
   type        = string
 }
 
-variable "cf_domain_name" {
-  description = "The CF domain name"
+variable "hosted_zone_id" { 
+  description = "The hosted_zone id"
   type        = string
 }
 
-variable "cf_zone_id" {
-  description = "The CF zone id"
+variable "cf_api_domain_name" {
+  description = "The Cloudfront domain name for the api"
+  type        = string
+}
+
+variable "cf_api_hz_id" {
+  description = "The Cloudfront HZ ID for the api"
   type        = string
 }
 
@@ -24,64 +24,41 @@ variable "evaluate_target_health" {
   default     = false
 }
 
-# Data source to get the existing hosted zone
-data "aws_route53_zone" "main" {
+# Create the A record for api.peter-greaves.net pointing to CloudFront
+resource "aws_route53_record" "api_subdomain" {
+
   zone_id = var.hosted_zone_id
-}
-
-# ACM Certificate for the custom domain
-resource "aws_acm_certificate" "api_cert" {
-  domain_name       = var.api_domain_name
-  validation_method = "DNS"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = {
-    Name = "API Gateway Certificate"
-  }
-}
-
-resource "aws_route53_record" "api_domain_record" {
-
-  name    = var.api_domain_name
+  name    = "api.${var.domain_name}"
   type    = "A"
-  zone_id = data.aws_route53_zone.main.zone_id
 
   alias {
-    evaluate_target_health = var.evaluate_target_health
-    name    = var.cf_domain_name
-    zone_id = var.cf_zone_id
+    name                   = var.cf_api_domain_name
+    zone_id                = var.cf_api_hz_id
+    evaluate_target_health = false
   }
 }
 
-# DNS validation records for ACM certificate
-resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.api_cert.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
+# Create the AAAA record for IPv6 support
+resource "aws_route53_record" "api_subdomain_ipv6" {
+
+  zone_id = var.hosted_zone_id
+  name    = "api.${var.domain_name}"
+  type    = "AAAA"
+
+  alias {
+    name                   = var.cf_api_domain_name
+    zone_id                = var.cf_api_hz_id
+    evaluate_target_health = false
   }
-
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = data.aws_route53_zone.main.zone_id
 }
 
-# ACM certificate validation
-resource "aws_acm_certificate_validation" "api_cert_validation" {
-  certificate_arn         = aws_acm_certificate.api_cert.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+# Provider configuration
+provider "aws" {
+  region = "eu-west-2"
 }
 
-
-output "api_certificate_arn" {
-  description = "The ARN of the API ACM certificate"
-  value       = aws_acm_certificate.api_cert.arn
+# Provider for ACM certificate (must be in us-east-1 for CloudFront)
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }

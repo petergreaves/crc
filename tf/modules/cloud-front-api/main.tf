@@ -1,6 +1,13 @@
 variable "api-id"{}
 
+variable "cert_arn" {}
+
+variable "domain_name"{}
+
 resource "aws_cloudfront_distribution" "resume_api_gateway_cf" {
+
+  aliases = ["api.${var.domain_name}"]
+
   enabled = true
   is_ipv6_enabled = true
   comment             = "CloudFront distribution for the counter API - ${var.api-id}"
@@ -39,19 +46,11 @@ resource "aws_cloudfront_distribution" "resume_api_gateway_cf" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
-    # If you have your own domain + ACM cert:
-    # acm_certificate_arn = aws_acm_certificate.example.arn
-    # ssl_support_method = "sni-only"
+    acm_certificate_arn      = var.cert_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 }
-
-# Output the CloudFront distribution domain name
-output "cloudfront_api_domain_name" {
-  description = "The domain name of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.resume_api_gateway_cf.domain_name
-}
-
 resource "aws_cloudfront_cache_policy" "geo-cache-policy" {
   name        = "geo-forwarding-policy"
   default_ttl = 50
@@ -71,4 +70,16 @@ resource "aws_cloudfront_cache_policy" "geo-cache-policy" {
       query_string_behavior = "all"
     }
   }
+}
+
+# Output the CloudFront distribution domain name
+output "cloudfront_api_domain_name" {
+  description = "The domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.resume_api_gateway_cf.domain_name
+}
+
+# Output the CloudFront distribution Z id
+output "cloudfront_api_hz_id" {
+  description = "The HZ ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.resume_api_gateway_cf.hosted_zone_id
 }

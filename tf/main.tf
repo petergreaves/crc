@@ -37,6 +37,8 @@ module "content-s3"{
 module "cloud-front-api" {
   source = "./modules/cloud-front-api"
   api-id = element(split("/",module.api-gw.api-gw-arn), 2)
+  cert_arn = var.cert_arn
+  domain_name=var.hosted-zone-name
 }
 
 module "cloud-front-web" {
@@ -48,4 +50,12 @@ module "cloud-front-web" {
   bucket_reg_domain_name=module.content-s3.bucket_reg_domain_name
   bucket_arn=module.content-s3.bucket_arn
   cert_arn = var.cert_arn
+}
+
+module "api-hostname" {
+  source = "./modules/api-hostname"
+  domain_name=var.hosted-zone-name
+  cf_api_domain_name = module.cloud-front-api.cloudfront_api_domain_name
+  cf_api_hz_id       = module.cloud-front-api.cloudfront_api_hz_id
+  hosted_zone_id=var.hosted-zone-id
 }
