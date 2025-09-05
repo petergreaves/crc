@@ -47,4 +47,9 @@ variable "cert_arn"{
   type = string
   default="arn:aws:acm:us-east-1:869700439563:certificate/0736b2dc-093f-4a60-bacb-e28e70414a25"
 }
+variable "access-control-allow-origin-url" {
+  description = "the URL for the CORS Access contrpl allowed origin in lambda"
+  type = string
+  default="https://about.peter-greaves.net"
+}
 
