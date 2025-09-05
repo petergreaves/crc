@@ -17,6 +17,8 @@ resource "random_string" "random" {
 
 variable "counter-table-name" {}
 
+variable "access-control-allow-origin-url" {}
+
 variable "api_gateway_execution_arn" {
   description = "Base execution ARN from API Gateway (without path pattern)"
   type        = string
@@ -45,6 +47,12 @@ resource "aws_lambda_function" "counter-lambda" {
   role             = aws_iam_role.counter-lambda-role.arn
   handler          = "counter_function.counter_handler"
   runtime          = "python3.10"
+
+  environment {
+    variables = {
+      ACAO_URL = var.access-control-allow-origin-url
+    }
+  }
 }
 
 resource "aws_iam_role" "counter-lambda-role" {

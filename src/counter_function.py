@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 # Initialize DynamoDB resource
 dynamodb = boto3.resource('dynamodb')
 metrics_table = dynamodb.Table('metrics')
+acao_url = os.environ.get('ACAO_URL')
 
 def counter_handler(event, context):
     """
@@ -18,7 +19,7 @@ def counter_handler(event, context):
     we only support GET to retrieve the count of all items (or 0),
     and PUT, which adds a new item and returns the updated count.
     """
-
+    
     try:
         # Get HTTP method - check multiple possible locations
         http_method = None
@@ -54,7 +55,7 @@ def counter_handler(event, context):
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': 'https://about.peter-greaves.net',
+                'Access-Control-Allow-Origin': acao_url,
                 'Access-Control-Allow-Methods': 'OPTIONS,PUT,GET'},
             'body': json.dumps({
                 'hits': response
@@ -75,7 +76,7 @@ def getOptions():
         'statusCode': 200,
         'headers': {
             'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': 'https://about.peter-greaves.net',
+            'Access-Control-Allow-Origin': acao_url,
             'Access-Control-Allow-Methods': 'OPTIONS,PUT,GET'
         }
     }
