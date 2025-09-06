@@ -1,15 +1,15 @@
 # outputs.tf
-output "dynamodb_table_name" {
+output "dynamodb-table-name" {
   description = "Name of the DynamoDB table"
-  value       = module.db.metrics_table_name
+  value       = module.db.metrics-table-name
 }
 
-output "dynamodb_table_arn" {
+output "dynamodb-table-arn" {
   description = "ARN of the DynamoDB table"
   value       = module.db.metrics_table_arn
 }
 
-output "dynamodb_table_id" {
+output "dynamodb-table-id" {
   description = "ID of the DynamoDB table"
   value       = module.db.metrics_table_id
 }
@@ -34,7 +34,7 @@ output "api-gw-exec-arn" {
 }
 
 # Output the CloudFront distribution domain name
-output "cloudfront_api_domain_name" {
+output "cloudfront-api-domain-name" {
   description = "The domain name of the CloudFront distribution"
-  value       = module.cloud-front-api.cloudfront_api_domain_name
+  value       = module.cloud-front-api.cloudfront-api-domain-name
 }

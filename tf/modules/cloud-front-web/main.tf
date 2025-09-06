@@ -1,31 +1,31 @@
-variable content_bucket_name{
+variable content-bucket-name{
   type = string
 }
-variable hz_name{
+variable hz-name{
   type = string
 }
-variable hosted_zone_id {
+variable hosted-zone-id {
   type=string
 }
 
-variable rec_prefix{
+variable rec-prefix{
   type=string
 }
-variable bucket_reg_domain_name{
-  type=string
-}
-
-variable bucket_arn{
+variable bucket-reg-domain-name{
   type=string
 }
 
-variable cert_arn{
+variable bucket-arn{
   type=string
 }
 
-resource "aws_route53_record" "www_A" {
-  zone_id = var.hosted_zone_id
-  name    = "${var.rec_prefix}.${var.hz_name}."
+variable cert-arn{
+  type=string
+}
+
+resource "aws_route53_record" "www-A" {
+  zone_id = var.hosted-zone-id
+  name    = "${var.rec-prefix}.${var.hz-name}."
   type    = "A"
  
 alias {
@@ -36,9 +36,9 @@ alias {
 }
 
 
-resource "aws_route53_record" "www_AAAA" {
-  zone_id = var.hosted_zone_id
-  name    = "${var.rec_prefix}.${var.hz_name}."
+resource "aws_route53_record" "www-AAAA" {
+  zone_id = var.hosted-zone-id
+  name    = "${var.rec-prefix}.${var.hz-name}."
   type    = "AAAA"
  
 alias {
@@ -67,7 +67,7 @@ resource "aws_cloudfront_origin_access_control" "s3_oac" {
 resource "aws_cloudfront_distribution" "resume_distribution" {
 
   origin {
-    domain_name              = var.bucket_reg_domain_name
+    domain_name              = var.bucket-reg-domain-name
     origin_id                = "S3-resume-bucket"
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
 
@@ -125,7 +125,7 @@ resource "aws_cloudfront_distribution" "resume_distribution" {
 
   # SSL Certificate configuration
   viewer_certificate {
-    acm_certificate_arn      = var.cert_arn
+    acm_certificate_arn      = var.cert-arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
@@ -137,8 +137,8 @@ resource "aws_cloudfront_distribution" "resume_distribution" {
 }
 
 # S3 bucket policy to allow CloudFront access
-resource "aws_s3_bucket_policy" "resume_bucket_policy" {
-  bucket = var.content_bucket_name
+resource "aws_s3_bucket_policy" "resume-bucket-policy" {
+  bucket = var.content-bucket-name
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -150,7 +150,7 @@ resource "aws_s3_bucket_policy" "resume_bucket_policy" {
           Service = "cloudfront.amazonaws.com"
         }
         Action   = "s3:GetObject"
-        Resource = "${var.bucket_arn}/*"
+        Resource = "${var.bucket-arn}/*"
         Condition = {
           StringEquals = {
             "AWS:SourceArn" = aws_cloudfront_distribution.resume_distribution.arn
@@ -162,13 +162,13 @@ resource "aws_s3_bucket_policy" "resume_bucket_policy" {
 }
 
 # Output the CloudFront distribution domain name
-output "cloudfront_domain_name" {
+output "cloudfront-domain-name" {
   description = "The domain name of the CloudFront distribution"
   value       = aws_cloudfront_distribution.resume_distribution.domain_name
 }
 
 # Output the distribution ID
-output "distribution_id" {
+output "distribution-id" {
   description = "The CloudFront distribution ID"
   value       = aws_cloudfront_distribution.resume_distribution.id
 }

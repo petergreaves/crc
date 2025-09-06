@@ -1,19 +1,19 @@
-variable "domain_name" { 
+variable "domain-name" { 
   description = "The external domain name for the api"
   type        = string
 }
 
-variable "hosted_zone_id" { 
+variable "hosted-zone-id" { 
   description = "The hosted_zone id"
   type        = string
 }
 
-variable "cf_api_domain_name" {
+variable "cf-api-domain-name" {
   description = "The Cloudfront domain name for the api"
   type        = string
 }
 
-variable "cf_api_hz_id" {
+variable "cf-api-hz-id" {
   description = "The Cloudfront HZ ID for the api"
   type        = string
 }
@@ -27,13 +27,13 @@ variable "evaluate_target_health" {
 # Create the A record for api.peter-greaves.net pointing to CloudFront
 resource "aws_route53_record" "api_subdomain" {
 
-  zone_id = var.hosted_zone_id
-  name    = "api.${var.domain_name}"
+  zone_id = var.hosted-zone-id
+  name    = "api.${var.domain-name}"
   type    = "A"
 
   alias {
-    name                   = var.cf_api_domain_name
-    zone_id                = var.cf_api_hz_id
+    name                   = var.cf-api-domain-name
+    zone_id                = var.cf-api-hz-id
     evaluate_target_health = false
   }
 }
@@ -41,13 +41,13 @@ resource "aws_route53_record" "api_subdomain" {
 # Create the AAAA record for IPv6 support
 resource "aws_route53_record" "api_subdomain_ipv6" {
 
-  zone_id = var.hosted_zone_id
-  name    = "api.${var.domain_name}"
+  zone_id = var.hosted-zone-id
+  name    = "api.${var.domain-name}"
   type    = "AAAA"
 
   alias {
-    name                   = var.cf_api_domain_name
-    zone_id                = var.cf_api_hz_id
+    name                   = var.cf-api-domain-name
+    zone_id                = var.cf-api-hz-id
     evaluate_target_health = false
   }
 }

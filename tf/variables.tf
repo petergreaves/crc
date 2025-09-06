@@ -1,5 +1,5 @@
 # variables.tf
-variable "aws_region" {
+variable "aws-region" {
   description = "AWS region"
   type        = string
   default     = "eu-west-2"
@@ -11,7 +11,7 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "project_name" {
+variable "project-name" {
   description = "Project name"
   type        = string
   default     = "cloud-resume-challenge"
@@ -37,12 +37,12 @@ variable "hosted-zone-id" {
   default     = "Z0738660KJJM7N1VV5WV"
 }
 
-variable "domain_name" {
+variable "domain-name" {
   description = "the domain name of the site"
   type = string
   default="about.peter-greaves.net"
 }
-variable "cert_arn"{
+variable "cert-arn"{
   description = "the SSL cert referenced in the cloud front configuration"
   type = string
   default="arn:aws:acm:us-east-1:869700439563:certificate/0736b2dc-093f-4a60-bacb-e28e70414a25"
