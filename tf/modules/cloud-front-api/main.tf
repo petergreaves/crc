@@ -73,13 +73,13 @@ resource "aws_cloudfront_cache_policy" "geo-cache-policy" {
 }
 
 # Output the CloudFront distribution domain name
-output "cloudfront_api_domain_name" {
+output "cloudfront-api-domain-name" {
   description = "The domain name of the CloudFront distribution"
   value       = aws_cloudfront_distribution.resume_api_gateway_cf.domain_name
 }
 
 # Output the CloudFront distribution Z id
-output "cloudfront_api_hz_id" {
+output "cloudfront-api-hz-id" {
   description = "The HZ ID of the CloudFront distribution"
   value       = aws_cloudfront_distribution.resume_api_gateway_cf.hosted_zone_id
 }

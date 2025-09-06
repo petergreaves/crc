@@ -19,13 +19,13 @@ variable "counter-table-name" {}
 
 variable "access-control-allow-origin-url" {}
 
-variable "api_gateway_execution_arn" {
+variable "api-gateway-execution-arn" {
   description = "Base execution ARN from API Gateway (without path pattern)"
   type        = string
   default     = null
 }
 
-variable "api_gateway_source_arn_pattern" {
+variable "api-gateway-source-arn-pattern" {
   description = "Path pattern for API Gateway source ARN"
   type        = string
   default     = "/*/*"  # Allow all stages and methods by default
@@ -79,7 +79,7 @@ resource "aws_lambda_permission" "api_gateway_invoke" {
   function_name = aws_lambda_function.counter-lambda.function_name
   principal     = "apigateway.amazonaws.com"
   
-  source_arn = "${var.api_gateway_execution_arn}${var.api_gateway_source_arn_pattern}"
+  source_arn = "${var.api-gateway-execution-arn}${var.api-gateway-source-arn-pattern}"
 }
 
 resource "aws_iam_policy" "counter-db-policy" {

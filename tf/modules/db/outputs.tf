@@ -1,4 +1,4 @@
-output "metrics_table_name" {
+output "metrics-table-name" {
   value = "${aws_dynamodb_table.metrics.name}"
 }
 output "metrics_table_arn" {

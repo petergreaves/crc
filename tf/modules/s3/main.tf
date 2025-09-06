@@ -20,11 +20,11 @@ resource "aws_s3_bucket" "website-bucket"{
 }
 
 
-output "bucket_reg_domain_name" {
+output "bucket-reg-domain-name" {
   value = aws_s3_bucket.website-bucket.bucket_regional_domain_name
 }
 
-output "bucket_arn" {
+output "bucket-arn" {
   value = "${aws_s3_bucket.website-bucket.arn}"
 }
 
@@ -43,7 +43,7 @@ resource "aws_s3_bucket_website_configuration" "website-bucket-conf" {
 }
 
 # Allow public access for website hosting
-resource "aws_s3_bucket_public_access_block" "website_bucket_pab" {
+resource "aws_s3_bucket_public_access_block" "website-bucket-pab" {
   bucket = aws_s3_bucket.website-bucket.id
 
   block_public_acls       = false
@@ -53,7 +53,7 @@ resource "aws_s3_bucket_public_access_block" "website_bucket_pab" {
 }
 
 # Bucket policy to allow public read access
-resource "aws_s3_bucket_policy" "website_bucket_policy" {
+resource "aws_s3_bucket_policy" "website-bucket-policy" {
   bucket = aws_s3_bucket.website-bucket.id
 
   policy = jsonencode({
@@ -69,5 +69,5 @@ resource "aws_s3_bucket_policy" "website_bucket_policy" {
     ]
   })
 
-  depends_on = [aws_s3_bucket_public_access_block.website_bucket_pab]
+  depends_on = [aws_s3_bucket_public_access_block.website-bucket-pab]
 }

@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = var.aws-region
 }
 
 
@@ -25,8 +25,8 @@ module "api-gw"{
 
 module "lambda"{
   source = "./modules/counter-lambda"
-  counter-table-name = module.db.metrics_table_name
-  api_gateway_execution_arn=module.api-gw.api-gw-exec-arn
+  counter-table-name = module.db.metrics-table-name
+  api-gateway-execution-arn=module.api-gw.api-gw-exec-arn
   access-control-allow-origin-url=var.access-control-allow-origin-url
 }
 
@@ -38,25 +38,25 @@ module "content-s3"{
 module "cloud-front-api" {
   source = "./modules/cloud-front-api"
   api-id = element(split("/",module.api-gw.api-gw-arn), 2)
-  cert_arn = var.cert_arn
+  cert_arn = var.cert-arn
   domain_name=var.hosted-zone-name
 }
 
 module "cloud-front-web" {
   source = "./modules/cloud-front-web"
-  content_bucket_name=var.content-bucket-name
-  hz_name=var.hosted-zone-name
-  hosted_zone_id=var.hosted-zone-id
-  rec_prefix = var.rec-prefix
-  bucket_reg_domain_name=module.content-s3.bucket_reg_domain_name
-  bucket_arn=module.content-s3.bucket_arn
-  cert_arn = var.cert_arn
+  content-bucket-name=var.content-bucket-name
+  hz-name=var.hosted-zone-name
+  hosted-zone-id=var.hosted-zone-id
+  rec-prefix = var.rec-prefix
+  bucket-reg-domain-name=module.content-s3.bucket-reg-domain-name
+  bucket-arn=module.content-s3.bucket-arn
+  cert-arn = var.cert-arn
 }
 
 module "api-hostname" {
   source = "./modules/api-hostname"
-  domain_name=var.hosted-zone-name
-  cf_api_domain_name = module.cloud-front-api.cloudfront_api_domain_name
-  cf_api_hz_id       = module.cloud-front-api.cloudfront_api_hz_id
-  hosted_zone_id=var.hosted-zone-id
+  domain-name=var.hosted-zone-name
+  cf-api-domain-name = module.cloud-front-api.cloudfront-api-domain-name
+  cf-api-hz-id       = module.cloud-front-api.cloudfront-api-hz-id
+  hosted-zone-id=var.hosted-zone-id
 }
