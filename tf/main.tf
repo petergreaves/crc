@@ -1,10 +1,18 @@
 terraform {
+   backend "remote" {
+    organization = "cloud-work-peter-greaves64"
+    workspaces {
+      name = "cloud-resume-challenge"
+    }
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
+  
 }
 
 provider "aws" {
